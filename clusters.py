@@ -1,4 +1,4 @@
-import sys
+import sys, os, shutil
 from read_frame import molecules
 
 if __name__=="__main__":
@@ -8,7 +8,7 @@ if __name__=="__main__":
     total_molecules = number_of_ethanol + number_of_water
 
     # Choose number of clusters to generate
-    number_of_clusters = 120
+    number_of_clusters = 400
 
     # Choose radius cutoff, in angstroms
     radius_cutoff = 8.40
@@ -29,38 +29,117 @@ if __name__=="__main__":
 
         # Output file
         if central_molecule.ycm > surf_ymin and central_molecule.ycm < surf_ymax:
+            cluster_type = "surface"
             fcluster = open("surf%d.xyz"%surf,"w")
             fmolcas = open("surf%d.input"%surf,"w")
+            fmolcas_zeta1 = open("surf%d_zeta1.input"%surf,"w")
+            fmolcas_zeta2 = open("surf%d_zeta2.input"%surf,"w")
+            fmolcas_zeta1_expbas = open("surf%d_zeta1_expbas.input"%surf,"w")
+            fmolcas_zeta2_expbas = open("surf%d_zeta2_expbas.input"%surf,"w")
+            fmolcas_mcpdft = open("surf%d_mcpdft.input"%surf,"w")
+            
+            # Create individual directory
+            os.mkdir("./surf%d"%surf)
             surf += 1
+
         else:
+            cluster_type = "bulk"
             fcluster = open("bulk%d.xyz"%bulk,"w")
             fmolcas = open("bulk%d.input"%bulk,"w")
+            fmolcas_zeta1 = open("bulk%d_zeta1.input"%bulk,"w")
+            fmolcas_zeta2 = open("bulk%d_zeta2.input"%bulk,"w")
+            fmolcas_zeta1_expbas = open("bulk%d_zeta1_expbas.input"%bulk,"w")
+            fmolcas_zeta2_expbas = open("bulk%d_zeta2_expbas.input"%bulk,"w")
+            fmolcas_mcpdft = open("bulk%d_mcpdft.input"%bulk,"w")
+            
+            # Create individual directory
+            os.mkdir("./bulk%d"%bulk)
             bulk += 1
 
         fmolcas.write("&SEWARD\n Cholesky\n")
+        fmolcas_zeta1_expbas.write("&SEWARD\n Cholesky\n")
+        fmolcas_zeta2_expbas.write("&SEWARD\n Cholesky\n")
+        fmolcas_zeta1.write("&SEWARD\n Cholesky\n")
+        fmolcas_zeta2.write("&SEWARD\n Cholesky\n")
+        fmolcas_mcpdft.write("&SEWARD\n Cholesky\n")
         h_index = 1
         c_index = 1
         o_index = 1
         for i in range(central_molecule.number_of_atoms):
             if central_molecule.list_of_types[i] == 'H':
+                atom_string = " H" + str(h_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) + "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                 fmolcas.write(" Basis set\n  H.ANO-RCC-VDZP\n")
-                fmolcas.write(" H" + str(h_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) +
-                              "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                fmolcas.write(atom_string)
                 fmolcas.write(" End of basis\n")
+                fmolcas_mcpdft.write(" Basis set\n  H.ANO-RCC-VDZP\n")
+                fmolcas_mcpdft.write(atom_string)
+                fmolcas_mcpdft.write(" End of basis\n")
+                fmolcas_zeta1_expbas.write(" Basis set\n  H.ANO-RCC-VDZP\n")
+                fmolcas_zeta1_expbas.write(atom_string)
+                fmolcas_zeta1_expbas.write(" End of basis\n")
+                fmolcas_zeta2_expbas.write(" Basis set\n  H.ANO-RCC-VDZP\n")
+                fmolcas_zeta2_expbas.write(atom_string)
+                fmolcas_zeta2_expbas.write(" End of basis\n")
+                fmolcas_zeta1.write(" Basis set\n  H.ANO-RCC-VDZP\n")
+                fmolcas_zeta1.write(atom_string)
+                fmolcas_zeta1.write(" End of basis\n")
+                fmolcas_zeta2.write(" Basis set\n  H.ANO-RCC-VDZP\n")
+                fmolcas_zeta2.write(atom_string)
+                fmolcas_zeta2.write(" End of basis\n")
                 h_index += 1
 
             if central_molecule.list_of_types[i] == 'C':
+                atom_string = " C" + str(c_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) + "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                 fmolcas.write(" Basis set\n  C.ANO-RCC-VDZP\n")
-                fmolcas.write(" C" + str(c_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) +
-                              "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                fmolcas.write(atom_string)
                 fmolcas.write(" End of basis\n")
+                fmolcas_mcpdft.write(" Basis set\n  C.ANO-RCC-VDZP\n")
+                fmolcas_mcpdft.write(atom_string)
+                fmolcas_mcpdft.write(" End of basis\n")
+                fmolcas_zeta1_expbas.write(" Basis set\n  C.ANO-RCC-VDZP\n")
+                fmolcas_zeta1_expbas.write(atom_string)
+                fmolcas_zeta1_expbas.write(" End of basis\n")
+                fmolcas_zeta2_expbas.write(" Basis set\n  C.ANO-RCC-VDZP\n")
+                fmolcas_zeta2_expbas.write(atom_string)
+                fmolcas_zeta2_expbas.write(" End of basis\n")
+                if c_index == 1:
+                    fmolcas_zeta1.write(" Basis set\n  N.ANO-RCC-VDZP\n")
+                    fmolcas_zeta1.write(atom_string)
+                    fmolcas_zeta1.write(" End of basis\n")
+                    fmolcas_zeta2.write(" Basis set\n  C.ANO-RCC-VDZP\n")
+                    fmolcas_zeta2.write(atom_string)
+                    fmolcas_zeta2.write(" End of basis\n")
+                elif c_index == 2:
+                    fmolcas_zeta1.write(" Basis set\n  C.ANO-RCC-VDZP\n")
+                    fmolcas_zeta1.write(atom_string)
+                    fmolcas_zeta1.write(" End of basis\n")
+                    fmolcas_zeta2.write(" Basis set\n  N.ANO-RCC-VDZP\n")
+                    fmolcas_zeta2.write(atom_string)
+                    fmolcas_zeta2.write(" End of basis\n")
+                else:
+                    raise Exception("Error! More than 2 carbon atoms in ethanol. Check code.")
                 c_index += 1
 
             if central_molecule.list_of_types[i] == 'O':
+                atom_string = " O" + str(o_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) + "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                 fmolcas.write(" Basis set\n  O.ANO-RCC-VDZP\n")
-                fmolcas.write(" O" + str(o_index) + "\t" + str(central_molecule.list_of_coord[i][0]) + "\t" + str(central_molecule.list_of_coord[i][1]) +
-                              "\t" + str(central_molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                fmolcas.write(atom_string)
                 fmolcas.write(" End of basis\n")
+                fmolcas_mcpdft.write(" Basis set\n  O.ANO-RCC-VDZP\n")
+                fmolcas_mcpdft.write(atom_string)
+                fmolcas_mcpdft.write(" End of basis\n")
+                fmolcas_zeta1_expbas.write(" Basis set\n  O.ANO-RCC-VDZP\n")
+                fmolcas_zeta1_expbas.write(atom_string)
+                fmolcas_zeta1_expbas.write(" End of basis\n")
+                fmolcas_zeta2_expbas.write(" Basis set\n  O.ANO-RCC-VDZP\n")
+                fmolcas_zeta2_expbas.write(atom_string)
+                fmolcas_zeta2_expbas.write(" End of basis\n")
+                fmolcas_zeta1.write(" Basis set\n  O.ANO-RCC-VDZP\n")
+                fmolcas_zeta1.write(atom_string)
+                fmolcas_zeta1.write(" End of basis\n")
+                fmolcas_zeta2.write(" Basis set\n  O.ANO-RCC-VDZP\n")
+                fmolcas_zeta2.write(atom_string)
+                fmolcas_zeta2.write(" End of basis\n")
                 o_index += 1
 
         # All good! Let's go
@@ -76,36 +155,143 @@ if __name__=="__main__":
                 # Writting to molcas input
                 for i in range(molecule.number_of_atoms):
                     if molecule.list_of_types[i] == 'H':
+                        atom_string = " H" + str(h_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) + "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                         fmolcas.write(" Basis set\n  H.ANO-S-MB\n")
-                        fmolcas.write(" H" + str(h_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) +
-                                      "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                        fmolcas.write(atom_string)
                         fmolcas.write(" End of basis\n")
+                        fmolcas_mcpdft.write(" Basis set\n  H.ANO-S-MB\n")
+                        fmolcas_mcpdft.write(atom_string)
+                        fmolcas_mcpdft.write(" End of basis\n")
+                        fmolcas_zeta1_expbas.write(" Basis set\n  H.ANO-S-MB\n")
+                        fmolcas_zeta1_expbas.write(atom_string)
+                        fmolcas_zeta1_expbas.write(" End of basis\n")
+                        fmolcas_zeta2_expbas.write(" Basis set\n  H.ANO-S-MB\n")
+                        fmolcas_zeta2_expbas.write(atom_string)
+                        fmolcas_zeta2_expbas.write(" End of basis\n")
+                        fmolcas_zeta1.write(" Basis set\n  H.ANO-S-MB\n")
+                        fmolcas_zeta1.write(atom_string)
+                        fmolcas_zeta1.write(" End of basis\n")
+                        fmolcas_zeta2.write(" Basis set\n  H.ANO-S-MB\n")
+                        fmolcas_zeta2.write(atom_string)
+                        fmolcas_zeta2.write(" End of basis\n")
                         h_index += 1
 
                     if molecule.list_of_types[i] == 'C':
+                        atom_string = " C" + str(c_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) + "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                         fmolcas.write(" Basis set\n  C.ANO-S-MB\n")
-                        fmolcas.write(" C" + str(c_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) +
-                                      "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                        fmolcas.write(atom_string)
                         fmolcas.write(" End of basis\n")
+                        fmolcas_mcpdft.write(" Basis set\n  C.ANO-S-MB\n")
+                        fmolcas_mcpdft.write(atom_string)
+                        fmolcas_mcpdft.write(" End of basis\n")
+                        fmolcas_zeta1_expbas.write(" Basis set\n  C.ANO-S-MB\n")
+                        fmolcas_zeta1_expbas.write(atom_string)
+                        fmolcas_zeta1_expbas.write(" End of basis\n")
+                        fmolcas_zeta2_expbas.write(" Basis set\n  C.ANO-S-MB\n")
+                        fmolcas_zeta2_expbas.write(atom_string)
+                        fmolcas_zeta2_expbas.write(" End of basis\n")
+                        fmolcas_zeta1.write(" Basis set\n  C.ANO-S-MB\n")
+                        fmolcas_zeta1.write(atom_string)
+                        fmolcas_zeta1.write(" End of basis\n")
+                        fmolcas_zeta2.write(" Basis set\n  C.ANO-S-MB\n")
+                        fmolcas_zeta2.write(atom_string)
+                        fmolcas_zeta2.write(" End of basis\n")
                         c_index += 1
 
                     if molecule.list_of_types[i] == 'O':
+                        atom_string = " O" + str(o_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) + "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n"
                         fmolcas.write(" Basis set\n  O.ANO-S-MB\n")
-                        fmolcas.write(" O" + str(o_index) + "\t" + str(molecule.list_of_coord[i][0]) + "\t" + str(molecule.list_of_coord[i][1]) +
-                                      "\t" + str(molecule.list_of_coord[i][2]) + " Angstrom" + "\n")
+                        fmolcas.write(atom_string)
                         fmolcas.write(" End of basis\n")
+                        fmolcas_mcpdft.write(" Basis set\n  O.ANO-S-MB\n")
+                        fmolcas_mcpdft.write(atom_string)
+                        fmolcas_mcpdft.write(" End of basis\n")
+                        fmolcas_zeta1_expbas.write(" Basis set\n  O.ANO-S-MB\n")
+                        fmolcas_zeta1_expbas.write(atom_string)
+                        fmolcas_zeta1_expbas.write(" End of basis\n")
+                        fmolcas_zeta2_expbas.write(" Basis set\n  O.ANO-S-MB\n")
+                        fmolcas_zeta2_expbas.write(atom_string)
+                        fmolcas_zeta2_expbas.write(" End of basis\n")
+                        fmolcas_zeta1.write(" Basis set\n  O.ANO-S-MB\n")
+                        fmolcas_zeta1.write(atom_string)
+                        fmolcas_zeta1.write(" End of basis\n")
+                        fmolcas_zeta2.write(" Basis set\n  O.ANO-S-MB\n")
+                        fmolcas_zeta2.write(atom_string)
+                        fmolcas_zeta2.write(" End of basis\n")
                         o_index += 1
             
                 cluster_size += 1
                 cluster_atoms_quantity += molecule.number_of_atoms
-        fmolcas.write(" Douglas-Kroll\n&SCF\n >>> COPY $Project.ScfOrb $CurrDir/$Project.ScfOrb")
+        
+        # Number of doubly occupied orbitals of the neutral closed shell ground state
+        nrof_orbitals = int(((h_index - 1) + 6*(c_index - 1) + 8*(o_index - 1))/2)
+
+        # Write the rest of each MOLCAS input
+        fmolcas.write(" Douglas-Kroll\n&SCF\n KSDFT \n  B3LYP\n>>> COPY $Project.ScfOrb $CurrDir/$Project.ScfOrb")
+        
+        # Writting section for surface clusters
+        if cluster_type == "surface":
+            fmolcas_mcpdft.write(" Douglas-Kroll\n>>> COPY $CurrDir/surf%d.ScfOrb INPORB\n&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  1\n NactEl\n  2 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.gs.JobIph\n"%((surf - 1),(nrof_orbitals - 1)))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.gs.JobMix\n\n")
+            fmolcas_mcpdft.write(">>> COPY $CurrDir/surf%d_zeta1_expbas.ExpOrb INPORB\n"%(surf - 1))
+            fmolcas_mcpdft.write("&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  2\n NactEl\n  1 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n Alter\n  1\n  1 %d %d\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.zeta1.JobIph\n"%((nrof_orbitals - 1), o_index, nrof_orbitals))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.zeta1.JobMix\n\n")
+            fmolcas_mcpdft.write(">>> COPY $CurrDir/surf%d_zeta2_expbas.ExpOrb INPORB\n"%(surf - 1))
+            fmolcas_mcpdft.write("&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  2\n NactEl\n  1 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n Alter\n  1\n  1 %d %d\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.zeta1.JobIph\n"%((nrof_orbitals - 1), o_index, nrof_orbitals))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.zeta2.JobMix\n\n")
+
+            fmolcas_zeta1_expbas.write(" Douglas-Kroll\n>>> COPY $CurrDir/surf%d_zeta1.ScfOrb INPORB\n>>> COPY $Project.RunFile RUNFIL1\n>>> COPY $CurrDir/surf%d_zeta1.RunFile RUNFIL2\n&EXPBAS\n>>> COPY $Project.ExpOrb $CurrDir/$Project.ExpOrb"%(surf - 1,surf - 1))
+            fmolcas_zeta2_expbas.write(" Douglas-Kroll\n>>> COPY $CurrDir/surf%d_zeta2.ScfOrb INPORB\n>>> COPY $Project.RunFile RUNFIL1\n>>> COPY $CurrDir/surf%d_zeta2.RunFile RUNFIL2\n&EXPBAS\n>>> COPY $Project.ExpOrb $CurrDir/$Project.ExpOrb"%(surf - 1,surf - 1))
+
+        # Writting section for bulk clusters
+        if cluster_type == "bulk":
+            fmolcas_mcpdft.write(" Douglas-Kroll\n>>> COPY $CurrDir/bulk%d.ScfOrb INPORB\n&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  1\n NactEl\n  2 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.gs.JobIph\n"%((bulk - 1),(nrof_orbitals - 1)))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.gs.JobMix\n\n")
+            fmolcas_mcpdft.write(">>> COPY $CurrDir/bulk%d_zeta1_expbas.ExpOrb INPORB\n"%(bulk - 1))
+            fmolcas_mcpdft.write("&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  2\n NactEl\n  1 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n Alter\n  1\n  1 %d %d\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.zeta1.JobIph\n"%((nrof_orbitals - 1), o_index, nrof_orbitals))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.zeta1.JobMix\n\n")
+            fmolcas_mcpdft.write(">>> COPY $CurrDir/bulk%d_zeta2_expbas.ExpOrb INPORB\n"%(bulk - 1))
+            fmolcas_mcpdft.write("&RASSCF\n LumOrb\n Symmetry\n  1\n Spin\n  2\n NactEl\n  1 1 0\n Inactive\n  %d\n Ras1\n  1\n Ras2\n  0\n Ras3\n  0\n Alter\n  1\n  1 %d %d\n CIOnly\n KSDFT\n ROKS; T:B3LYP\n CIRoot\n  1 1 1\n>>> COPY $Project.JobIph $CurrDir/$Project.zeta1.JobIph\n"%((nrof_orbitals - 1), o_index, nrof_orbitals))
+            fmolcas_mcpdft.write("&CASPT2\n  Multistate\n  All\n MaxIter\n  200\n Imag\n  0.15\n>>> COPY $Project.JobMix $CurrDir/$Project.zeta2.JobMix\n\n")
+
+            fmolcas_zeta1_expbas.write(" Douglas-Kroll\n>>> COPY $CurrDir/bulk%d_zeta1.ScfOrb INPORB\n>>> COPY $Project.RunFile RUNFIL1\n>>> COPY $CurrDir/bulk%d_zeta1.RunFile RUNFIL2\n&EXPBAS\n>>> COPY $Project.ExpOrb $CurrDir/$Project.ExpOrb"%(bulk - 1,bulk - 1))
+            fmolcas_zeta2_expbas.write(" Douglas-Kroll\n>>> COPY $CurrDir/bulk%d_zeta2.ScfOrb INPORB\n>>> COPY $Project.RunFile RUNFIL1\n>>> COPY $CurrDir/bulk%d_zeta2.RunFile RUNFIL2\n&EXPBAS\n>>> COPY $Project.ExpOrb $CurrDir/$Project.ExpOrb"%(bulk - 1,bulk - 1))
+    
+        fmolcas_zeta1.write(" Douglas-Kroll\n&SCF\n KSDFT \n  B3LYP\n Charge\n  1\n>>> COPY $Project.ScfOrb $CurrDir/$Project.ScfOrb\n>>> COPY $Project.RunFile $CurrDir/$Project.RunFile")
+        fmolcas_zeta2.write(" Douglas-Kroll\n&SCF\n KSDFT \n  B3LYP\n Charge\n  1\n>>> COPY $Project.ScfOrb $CurrDir/$Project.ScfOrb\n>>> COPY $Project.RunFile $CurrDir/$Project.RunFile")
+
+        # Close output files
         fmolcas.close()
+        fmolcas_mcpdft.close()
+        fmolcas_zeta1.close()
+        fmolcas_zeta2.close()
+        fmolcas_zeta1_expbas.close()
+        fmolcas_zeta2_expbas.close()
         fcluster.write("%d\n\n"%cluster_atoms_quantity)
         for i in range(cluster_size):
             molecules_in_cluster[i].write_molecule(fcluster)
         fcluster.close()
         cluster += 1
         index += 1
+
+        # Move files to directories
+        if cluster_type == "surface":
+            shutil.move("surf%d.xyz"%(surf - 1), "./surf%d/surf%d.xyz"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d.input"%(surf - 1), "./surf%d/surf%d.input"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d_zeta1.input"%(surf - 1), "./surf%d/surf%d_zeta1.input"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d_zeta2.input"%(surf - 1), "./surf%d/surf%d_zeta2.input"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d_zeta1_expbas.input"%(surf - 1), "./surf%d/surf%d_zeta1_expbas.input"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d_zeta2_expbas.input"%(surf - 1), "./surf%d/surf%d_zeta2_expbas.input"%((surf - 1),(surf - 1)))
+            shutil.move("surf%d_mcpdft.input"%(surf - 1), "./surf%d/surf%d_mcpdft.input"%((surf - 1),(surf - 1)))
+
+        elif cluster_type == "bulk":
+            shutil.move("bulk%d.xyz"%(bulk - 1), "./bulk%d/bulk%d.xyz"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d.input"%(bulk - 1), "./bulk%d/bulk%d.input"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d_zeta1.input"%(bulk - 1), "./bulk%d/bulk%d_zeta1.input"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d_zeta2.input"%(bulk - 1), "./bulk%d/bulk%d_zeta2.input"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d_zeta1_expbas.input"%(bulk - 1), "./bulk%d/bulk%d_zeta1_expbas.input"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d_zeta2_expbas.input"%(bulk - 1), "./bulk%d/bulk%d_zeta2_expbas.input"%((bulk - 1),(bulk - 1)))
+            shutil.move("bulk%d_mcpdft.input"%(bulk - 1), "./bulk%d/bulk%d_mcpdft.input"%((bulk - 1),(bulk - 1)))
     
     # Print totals
     print("\n Total number of generated clusters with radius cutoff of %f angstroms: %d"%(radius_cutoff, cluster - 1))
