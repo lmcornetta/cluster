@@ -85,7 +85,7 @@ class Molecule:
         self.zcm = zcm/mol_mass
     
     def is_broken(self):
-        # Check if the molecule is broke. That means it is disposed
+        # Check if the molecule is broken. That means it is disposed
         # partially at one part of the box and partially at another.
         # That happens sometimes due to periodic conditions.
         for i in range(self.number_of_atoms):
